@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Painel{% endblock %} — Bulk contratos</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="app-shell">
+  <aside class="sidebar" aria-label="Navegação principal">
+    <div class="sidebar-brand">
+      <span class="sidebar-brand-mark"></span>
+      <span class="sidebar-brand-text">Bulk contratos</span>
+    </div>
+    <p class="sidebar-tag">Webservice IXC</p>
+    <nav class="sidebar-nav">
+      <a href="{{ url_for('lote.index') }}" class="sidebar-link {% if request.path == '/' %}is-active{% endif %}">
+        <span class="sidebar-link-icon" aria-hidden="true">◆</span>
+        Criação em lote
+      </a>
+      <span class="sidebar-section">Em expansão</span>
+      <a href="{{ url_for('modulos.massa_contratos') }}" class="sidebar-link {% if request.path.startswith('/modulos/massa-contratos') %}is-active{% endif %}">
+        <span class="sidebar-link-icon" aria-hidden="true">◇</span>
+        Massa em contratos
+      </a>
+      <a href="{{ url_for('modulos.boletos') }}" class="sidebar-link {% if request.path.startswith('/modulos/boletos') %}is-active{% endif %}">
+        <span class="sidebar-link-icon" aria-hidden="true">◇</span>
+        Boletos
+      </a>
+    </nav>
+  </aside>
+  <div class="app-main">
+    <header class="topbar">
+      <h1 class="topbar-title">{% block page_heading %}Painel{% endblock %}</h1>
+      {% block topbar_extra %}{% endblock %}
+    </header>
+    <main class="content">
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+</body>
+</html>

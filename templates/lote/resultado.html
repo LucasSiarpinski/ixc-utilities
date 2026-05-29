@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Resultado do lote{% endblock %}
+{% block page_heading %}Resultado do lote{% endblock %}
+{% block topbar_extra %}
+  <p class="topbar-meta">Base: <code>{{ base_url }}</code></p>
+{% endblock %}
+{% block content %}
+    <p class="actions"><a href="{{ url_for('lote.index') }}" class="link-back">← Voltar ao formulário</a> <span class="hint">Os campos permanecem como você enviou.</span></p>
+
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Razão</th>
+            <th>Cliente</th>
+            <th>ID cliente</th>
+            <th>Contratos</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in linhas %}
+          <tr class="{% if not r.cliente_ok %}falha{% endif %}">
+            <td>{{ r.indice }}</td>
+            <td>{{ r.razao }}</td>
+            <td>{% if r.cliente_ok %}OK{% else %}Falha{% endif %}<br><small>{{ r.cliente_msg }}</small>{% if r.cliente_http %}<br><small>HTTP {{ r.cliente_http }}</small>{% endif %}</td>
+            <td>{{ r.cliente_id or "—" }}</td>
+            <td>
+              {% if r.contratos %}
+                <ul class="compact">
+                {% for c in r.contratos %}
+                  <li>{% if c.ok %}OK{% else %}Falha{% endif %} #{{ c.seq }} — ID {{ c.id or "—" }} — {{ c.msg }}{% if c.http %} (HTTP {{ c.http }}){% endif %}</li>
+                {% endfor %}
+                </ul>
+              {% else %}
+                —
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+{% endblock %}

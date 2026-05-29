@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+{% block title %}Criação em lote{% endblock %}
+{% block page_heading %}Criação em lote{% endblock %}
+{% block content %}
+    <p class="lead">Cliente (<code>POST /webservice/v1/cliente</code>) e contrato (<code>POST /webservice/v1/cliente_contrato</code>) com Basic Auth. Os dados do último envio ficam salvos neste navegador até você alterar.</p>
+
+    {% if erro %}
+    <p class="erro">{{ erro }}</p>
+    {% endif %}
+
+    <form method="post" action="{{ url_for('lote.executar') }}" class="grid">
+      <fieldset>
+        <legend>Conexão</legend>
+        <label>Base URL
+          <input type="url" name="base_url" required placeholder="https://seudominio.com.br" autocomplete="url" value="{{ prefill.base_url }}">
+        </label>
+        <label>Usuário
+          <input type="text" name="username" required autocomplete="username" value="{{ prefill.username }}">
+        </label>
+        <label>Senha
+          <input type="password" name="password" required autocomplete="current-password" value="{{ prefill.password }}">
+        </label>
+        <label class="check">
+          <input type="checkbox" name="verify_ssl" value="1" {% if prefill.verify_ssl %}checked{% endif %}>
+          <input type="hidden" name="verify_ssl" value="0">
+          Verificar certificado SSL (desmarque em homolog com certificado autoassinado ou inválido)
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Lote</legend>
+        <label>Quantidade de clientes
+          <input type="number" name="quantidade" min="1" max="500" value="{{ prefill.quantidade }}" required>
+        </label>
+        <label>Contratos por cliente
+          <input type="number" name="contratos_por_cliente" min="1" max="500" value="{{ prefill.contratos_por_cliente }}" required>
+        </label>
+        <label>Dígitos no sufixo (padding)
+          <input type="number" name="padding" min="1" max="8" value="{{ prefill.padding }}" required>
+        </label>
+        <label>Prefixo razão social
+          <input type="text" name="razao_prefix" value="{{ prefill.razao_prefix }}">
+        </label>
+        <label>Prefixo nome do contrato
+          <input type="text" name="contrato_prefix" value="{{ prefill.contrato_prefix }}">
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Cliente (sobrescreve template)</legend>
+        <label>CPF/CNPJ
+          <input type="text" name="cnpj_cpf" value="{{ prefill.cnpj_cpf }}">
+        </label>
+        <label>CEP
+          <input type="text" name="cep" value="{{ prefill.cep }}">
+        </label>
+        <label>Endereço
+          <input type="text" name="endereco" value="{{ prefill.endereco }}">
+        </label>
+        <label>Número
+          <input type="text" name="numero" value="{{ prefill.numero }}">
+        </label>
+        <label>Bairro
+          <input type="text" name="bairro" value="{{ prefill.bairro }}">
+        </label>
+        <label>Cidade (ID)
+          <input type="text" name="cidade" value="{{ prefill.cidade }}" pattern="[0-9]+" title="ID numérico">
+        </label>
+        <label>Tipo pessoa
+          <input type="text" name="tipo_pessoa" value="{{ prefill.tipo_pessoa }}" maxlength="1">
+        </label>
+        <label>Contribuinte ICMS
+          <input type="text" name="contribuinte_icms" value="{{ prefill.contribuinte_icms }}" maxlength="1">
+        </label>
+        <label>Tipo assinante
+          <input type="text" name="tipo_assinante" value="{{ prefill.tipo_assinante }}">
+        </label>
+        <label>Tipo localidade
+          <input type="text" name="tipo_localidade" value="{{ prefill.tipo_localidade }}" maxlength="1">
+        </label>
+        <label>ISS classificação
+          <input type="text" name="iss_classificacao_padrao" value="{{ prefill.iss_classificacao_padrao }}">
+        </label>
+        <label>Cob. envia e-mail
+          <input type="text" name="cob_envia_email" value="{{ prefill.cob_envia_email }}" placeholder="vazio ou S/N conforme base">
+        </label>
+        <label>Cob. envia SMS
+          <input type="text" name="cob_envia_sms" value="{{ prefill.cob_envia_sms }}" placeholder="vazio ou S/N conforme base">
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Contrato (sobrescreve template)</legend>
+        <label>Status de acesso <code>status_internet</code>
+          <select name="status_internet" required>
+            {% for code, desc in status_internet_options %}
+            <option value="{{ code }}" {% if prefill.status_internet == code %}selected{% endif %}>{{ code }} — {{ desc }}</option>
+            {% endfor %}
+          </select>
+          <span class="hint">O webservice recebe o <strong>código</strong> (ex.: <code>A</code> ativo, <code>AA</code> aguardando assinatura).</span>
+        </label>
+
+        <label>Status do contrato <code>status</code>
+          <select name="status" required>
+            {% for code, desc in status_contrato_options %}
+            <option value="{{ code }}" {% if prefill.status == code %}selected{% endif %}>{{ code }} — {{ desc }}</option>
+            {% endfor %}
+          </select>
+          <span class="hint">Define a situação atual do contrato (ex.: <code>A</code> ativo, <code>I</code> inativo).</span>
+        </label>
+        <label>Tipo
+          <input type="text" name="c_tipo" value="{{ prefill.c_tipo }}" maxlength="1">
+        </label>
+
+        <label>Tipo
+          <input type="text" name="c_tipo" value="{{ prefill.c_tipo }}" maxlength="1">
+        </label>
+        <label>Plano venda <code>id_vd_contrato</code>
+          <input type="text" name="id_vd_contrato" value="{{ prefill.id_vd_contrato }}">
+        </label>
+        <label>Tipo contrato <code>id_tipo_contrato</code>
+          <input type="text" name="id_tipo_contrato" value="{{ prefill.id_tipo_contrato }}">
+        </label>
+        <label>Modelo <code>id_modelo</code>
+          <input type="text" name="id_modelo" value="{{ prefill.id_modelo }}">
+        </label>
+        <label>Filial <code>id_filial</code>
+          <input type="text" name="id_filial" value="{{ prefill.id_filial }}">
+        </label>
+        <label>Data contrato <code>data</code>
+          <input type="text" name="data_contrato" value="{{ prefill.data_contrato }}" placeholder="DD/MM/AAAA">
+        </label>
+        <label>Tipo documento
+          <input type="text" name="id_tipo_documento" value="{{ prefill.id_tipo_documento }}">
+        </label>
+        <label>Carteira cobrança
+          <input type="text" name="id_carteira_cobranca" value="{{ prefill.id_carteira_cobranca }}">
+        </label>
+        <label>Vendedor
+          <input type="text" name="id_vendedor" value="{{ prefill.id_vendedor }}">
+        </label>
+        <label>CC previsão
+          <input type="text" name="cc_previsao" value="{{ prefill.cc_previsao }}" maxlength="1">
+        </label>
+        <label>Tipo cobrança
+          <input type="text" name="tipo_cobranca" value="{{ prefill.tipo_cobranca }}" maxlength="1">
+        </label>
+        <label>Renovação automática
+          <input type="text" name="renovacao_automatica" value="{{ prefill.renovacao_automatica }}" maxlength="1">
+        </label>
+        <label>Base geração tipo doc
+          <input type="text" name="base_geracao_tipo_doc" value="{{ prefill.base_geracao_tipo_doc }}" maxlength="1">
+        </label>
+        <label>Bloqueio automático
+          <input type="text" name="bloqueio_automatico" value="{{ prefill.bloqueio_automatico }}" maxlength="1">
+        </label>
+        <label>Aviso atraso
+          <input type="text" name="aviso_atraso" value="{{ prefill.aviso_atraso }}" maxlength="1">
+        </label>
+        <label>Endereço padrão cliente
+          <input type="text" name="endereco_padrao_cliente" value="{{ prefill.endereco_padrao_cliente }}" maxlength="1">
+        </label>
+      </fieldset>
+
+      <p class="actions">
+        <button type="submit">Executar lote</button>
+        <span class="hint">Use primeiro poucos registros. Limite interno: 500 clientes.</span>
+      </p>
+    </form>
+{% endblock %}
