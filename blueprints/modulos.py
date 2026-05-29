@@ -11,8 +11,6 @@ bp = Blueprint("modulos", __name__, url_prefix="/modulos")
 def massa_contratos():
     return render_template(
         "modulos/em_breve.html",
-        titulo="Massa em contratos",
-        descricao="Ações em lote sobre contratos já criados (alterações, segunda via, etc.).",
     )
 
 
@@ -20,6 +18,17 @@ def massa_contratos():
 def boletos():
     return render_template(
         "modulos/em_breve.html",
-        titulo="Boletos",
-        descricao="Consulta e recebimento de boletos em massa.",
     )
+
+@bp.get("/modelo-contrato")
+def modelo_contrato():
+    return render_template(
+        "modulos/modelo_de_contrato/index.html"
+    )
+
+@bp.get("/processar-logs-em-massa")
+def processar_logs_em_massa():
+    return render_template(
+        "modulos/processar_logs_em_massa/index.html",
+    )
+

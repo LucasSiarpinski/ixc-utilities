@@ -12,6 +12,11 @@
   --shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
+.logo-ixc-utilities img {
+  width: 30px;
+  height: 30px;
+}
+
 * {
   box-sizing: border-box;
 }

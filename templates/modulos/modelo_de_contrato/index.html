@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Conversor DOCX - CKEditor | IXC Provedor</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0f1117;--surface:#181c27;--surface2:#1e2435;--border:#2a3045;
+  --text:#e2e8f0;--muted:#64748b;--success:#22c55e;--danger:#ef4444;
+  --accent:#3b82f6;--accent2:#22d3ee;
+  --accentbg:rgba(59,130,246,.05);--accentbgh:rgba(59,130,246,.06);
+}
+body{font-family:'IBM Plex Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
+header{border-bottom:1px solid var(--border);padding:12px 20px;display:flex;align-items:center;gap:12px;background:var(--surface);flex-shrink:0}
+.logo{width:32px;height:32px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;transition:background .3s}
+.hinfo h1{font-size:13px;font-weight:500}
+.hinfo span{font-size:10px;color:var(--muted);font-family:'IBM Plex Mono',monospace}
+.version-switcher{display:flex;gap:6px;margin-left:auto;align-items:center}
+.vs-label{font-size:10px;color:var(--muted);font-family:'IBM Plex Mono',monospace;margin-right:4px}
+.vs-btn{padding:5px 14px;border-radius:20px;font-size:11px;font-weight:600;font-family:'IBM Plex Sans',sans-serif;cursor:pointer;border:1.5px solid var(--border);background:transparent;color:var(--muted);transition:all .2s}
+.vs-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.vs-btn.active.ck4{background:#f59e0b;border-color:#f59e0b;color:#111}
+.vs-btn:hover:not(.active){border-color:var(--accent);color:var(--text)}
+main{flex:1;display:grid;grid-template-columns:290px 1fr;overflow:hidden;height:calc(100vh - 53px)}
+.left{background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+.ph{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:7px;background:var(--surface2);font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);flex-shrink:0}
+.dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;background:var(--accent);transition:background .3s}
+.drop{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:22px 16px;cursor:pointer;border:2px dashed transparent;gap:9px;transition:background .2s;flex-shrink:0}
+.drop:hover,.drop.over{background:var(--accentbg);border-color:var(--accent)}
+.drop-icon{font-size:40px;opacity:.4;transition:opacity .2s,transform .2s}
+.drop:hover .drop-icon,.drop.over .drop-icon{opacity:.7;transform:translateY(-3px)}
+.drop h2{font-size:13px;font-weight:500;text-align:center}
+.drop p{font-size:11px;color:var(--muted);text-align:center;line-height:1.5}
+.btn-up{background:var(--accent);color:#fff;border:none;padding:7px 16px;border-radius:7px;font-size:11px;font-weight:600;font-family:'IBM Plex Sans',sans-serif;cursor:pointer;transition:background .2s}
+.btn-up:hover{filter:brightness(1.1)}
+#fi{display:none}
+.finfo{display:none;padding:9px 13px;border-bottom:1px solid var(--border);background:var(--accentbg);align-items:center;gap:9px;font-size:11px;flex-shrink:0}
+.fn{font-weight:500;flex:1;color:var(--accent2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px;transition:color .3s}
+.fs{color:var(--muted);font-family:'IBM Plex Mono',monospace;font-size:10px;flex-shrink:0}
+.mode-info{margin:10px 12px;padding:9px 12px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);font-size:11px;line-height:1.6;color:var(--muted);flex-shrink:0}
+.mode-info strong{display:block;color:var(--text);font-size:11px;margin-bottom:3px}
+.mode-info code{font-family:'IBM Plex Mono',monospace;font-size:10px;background:rgba(0,0,0,.3);padding:1px 4px;border-radius:3px;color:var(--accent2)}
+.hist-section{flex:1;overflow-y:auto;padding:9px 11px;display:flex;flex-direction:column;gap:4px;min-height:0}
+.hist-title{font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:3px;font-weight:500}
+.hist-item{padding:7px 9px;border-radius:7px;border:1px solid var(--border);cursor:pointer;transition:border-color .15s,background .15s}
+.hist-item:hover{border-color:var(--accent);background:var(--accentbgh)}
+.hi-name{color:var(--text);font-weight:500;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hi-meta{color:var(--muted);font-size:10px;font-family:'IBM Plex Mono',monospace;margin-top:2px}
+.hi-badge{display:inline-block;font-size:9px;padding:1px 6px;border-radius:10px;font-weight:600;margin-left:4px}
+.badge-ck4{background:rgba(245,158,11,.15);color:#f59e0b}
+.badge-ck5{background:rgba(59,130,246,.15);color:#60a5fa}
+.hist-empty{font-size:11px;color:var(--muted);text-align:center;padding:14px 0;opacity:.6}
+.sbar{padding:6px 12px;font-size:10px;font-family:'IBM Plex Mono',monospace;border-top:1px solid var(--border);background:var(--surface2);color:var(--muted);display:flex;align-items:center;gap:6px;min-height:28px;flex-shrink:0;overflow:hidden}
+.ind{width:6px;height:6px;border-radius:50%;background:var(--muted);flex-shrink:0}
+.sbar.ok .ind{background:var(--success)}
+.sbar.err .ind{background:var(--danger)}
+.sbar.loading .ind{background:var(--accent);animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.right{display:flex;flex-direction:column;overflow:hidden}
+.tabs{display:flex;border-bottom:1px solid var(--border);background:var(--surface2);flex-shrink:0}
+.tab{padding:9px 15px;font-size:11px;font-family:'IBM Plex Mono',monospace;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;transition:color .15s,border-color .15s}
+.tab.active{color:var(--accent2);border-bottom-color:var(--accent2)}
+.tab:hover:not(.active){color:var(--text)}
+.tc{display:none;flex:1;overflow:auto;min-height:0}
+.tc.active{display:flex;flex-direction:column}
+#prevC{background:#fff;padding:34px 42px;color:#111;font-family:'Times New Roman',serif;font-size:12pt;line-height:1.5;flex:1;overflow:auto}
+#prevC figure.table{width:100%!important;margin:5px 0}
+#prevC figure.table table{border-collapse:collapse;width:100%;border:1px solid #000;table-layout:fixed}
+#prevC figure.table table td,#prevC figure.table table th{border:1px solid #000;padding:4px 6px;vertical-align:top;word-wrap:break-word}
+#prevC table{border-collapse:collapse;width:100%;margin:5px 0}
+#prevC table td,#prevC table th{border:1px solid #000;padding:4px 6px;vertical-align:top;word-wrap:break-word}
+#prevC p{margin-bottom:5px}
+#prevC strong{font-weight:bold}#prevC em{font-style:italic}#prevC u{text-decoration:underline}
+#htmlC{flex:1;background:#0a0d14;min-height:0}
+#htmlCode{width:100%;height:100%;background:transparent;border:none;outline:none;resize:none;font-family:'IBM Plex Mono',monospace;font-size:11px;color:#a5f3fc;padding:16px;line-height:1.6}
+.empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--muted);font-size:13px;padding:40px;text-align:center}
+.empty-icon{font-size:44px;opacity:.2}
+.empty h3{font-size:14px;font-weight:500;color:var(--text);opacity:.4}
+.empty p{font-size:11px;line-height:1.6;max-width:300px}
+.acts{padding:8px 12px;border-top:1px solid var(--border);background:var(--surface2);display:flex;gap:6px;align-items:center;flex-shrink:0}
+.btn{padding:7px 13px;border-radius:7px;font-size:11px;font-weight:500;font-family:'IBM Plex Sans',sans-serif;cursor:pointer;border:none;transition:all .15s}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.bp{background:var(--accent);color:#fff;font-weight:600;transition:background .3s}
+.bp:hover:not(:disabled){filter:brightness(1.1)}
+.bp.ck4-style{background:#f59e0b;color:#111}
+.bs{background:transparent;border:1px solid var(--border);color:var(--muted)}
+.bs:hover:not(:disabled){border-color:var(--accent);color:var(--text)}
+.cok{background:var(--success)!important;color:#fff!important}
+.cc{margin-left:auto;font-size:10px;font-family:'IBM Plex Mono',monospace;color:var(--muted)}
+.dov{display:none;position:fixed;inset:0;background:rgba(59,130,246,.1);border:3px solid var(--accent);z-index:150;align-items:center;justify-content:center;font-size:17px;font-weight:500;color:var(--accent2);pointer-events:none;flex-direction:column;gap:10px}
+.dov.on{display:flex}
+@media(max-width:800px){main{grid-template-columns:1fr;height:auto}.left{max-height:360px}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo" id="headerLogo">&#128196;</div>
+  <div class="hinfo">
+    <h1 id="headerTitle">Conversor DOCX &rarr; CKEditor</h1>
+    <span id="headerSub">IXC Provedor &middot; Funciona offline &middot; Formato nativo com bordas</span>
+  </div>
+  <div class="version-switcher">
+    <span class="vs-label">Vers&atilde;o:</span>
+    <button class="vs-btn active" id="btnCK5">CKEditor 5</button>
+    <button class="vs-btn ck4"   id="btnCK4">CKEditor 4</button>
+  </div>
+</header>
+
+<main>
+  <div class="left">
+    <div class="ph"><div class="dot"></div><span>Arquivo &middot; Entrada</span></div>
+    <div id="finfo" class="finfo">
+      <span>&#128221;</span>
+      <span class="fn" id="fname">&mdash;</span>
+      <span class="fs" id="fsize">&mdash;</span>
+    </div>
+    <div class="drop" id="dz">
+      <div class="drop-icon">&#128194;</div>
+      <h2>Arraste qualquer .docx aqui</h2>
+      <p>Contratos, modelos, termos.<br>Qualquer documento Word.</p>
+      <button class="btn-up" id="btnSelectFile">Selecionar arquivo</button>
+      <input type="file" id="fi" accept=".docx">
+    </div>
+    <div class="mode-info" id="modeInfo"></div>
+    <div class="hist-section">
+      <div class="hist-title">Convers&otilde;es recentes</div>
+      <div class="hist-empty" id="histEmpty">Nenhuma convers&atilde;o ainda.</div>
+      <div id="histList"></div>
+    </div>
+    <div class="sbar" id="sb"><div class="ind"></div><span id="st">Pronto &mdash; arraste um .docx</span></div>
+  </div>
+
+  <div class="right">
+    <div class="tabs">
+      <div class="tab active" data-tab="Prev">&#128065; Preview</div>
+      <div class="tab" data-tab="Html">&lt;/&gt; HTML para CKEditor</div>
+    </div>
+    <div class="tc active" id="tabPrev">
+      <div id="prevC">
+        <div class="empty">
+          <div class="empty-icon">&#128203;</div>
+          <h3>Nenhum arquivo convertido</h3>
+          <p>Selecione a vers&atilde;o do CKEditor acima e arraste um .docx para converter.</p>
+        </div>
+      </div>
+    </div>
+    <div class="tc" id="tabHtml">
+      <div id="htmlC"><textarea id="htmlCode" readonly></textarea></div>
+    </div>
+    <div class="acts">
+      <button class="btn bp" id="btnCopy" disabled>&#128203; Copiar HTML</button>
+      <button class="btn bs" id="btnClear">&#128465; Limpar</button>
+      <span class="cc" id="cc"></span>
+    </div>
+  </div>
+</main>
+
+<div class="dov" id="dov">Solte o .docx aqui</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script>
+// ════════════════════════════════════════
+// ESTADO GLOBAL
+// ════════════════════════════════════════
+var currentMode = 'ck5';
+var currentHTML = '';
+var lastFile    = null;
+var fileHistory = [];
+
+var MODES = {
+  ck5: {
+    accent:'#3b82f6', accent2:'#22d3ee',
+    accentbg:'rgba(59,130,246,.05)', accentbgh:'rgba(59,130,246,.06)',
+    btnExtra:'', label:'CKEditor 5',
+    info:'<strong>Modo CKEditor 5</strong> &mdash; Gera <code>&lt;figure class="table"&gt;</code> + <code>ck-table-resized</code> + <code>border-color:#000000</code>.',
+    codeColor:'#a5f3fc'
+  },
+  ck4: {
+    accent:'#f59e0b', accent2:'#fbbf24',
+    accentbg:'rgba(245,158,11,.05)', accentbgh:'rgba(245,158,11,.06)',
+    btnExtra:'ck4-style', label:'CKEditor 4',
+    info:'<strong>Modo CKEditor 4</strong> &mdash; Gera <code>&lt;table border="1" cellpadding="1" cellspacing="1" style="width:100%;"&gt;</code>.',
+    codeColor:'#fcd34d'
+  }
+};
+
+// ════════════════════════════════════════
+// TROCA DE MODO
+// ════════════════════════════════════════
+function setMode(mode) {
+  currentMode = mode;
+  var m = MODES[mode];
+  var s = document.documentElement.style;
+  s.setProperty('--accent',    m.accent);
+  s.setProperty('--accent2',   m.accent2);
+  s.setProperty('--accentbg',  m.accentbg);
+  s.setProperty('--accentbgh', m.accentbgh);
+  document.getElementById('btnCK5').className = 'vs-btn'         + (mode === 'ck5' ? ' active' : '');
+  document.getElementById('btnCK4').className = 'vs-btn ck4' + (mode === 'ck4' ? ' active' : '');
+  document.getElementById('headerTitle').textContent = 'Conversor DOCX \u2192 ' + m.label;
+  document.getElementById('modeInfo').innerHTML      = m.info;
+  document.getElementById('btnCopy').className       = 'btn bp ' + m.btnExtra;
+  document.getElementById('htmlCode').style.color    = m.codeColor;
+  document.getElementById('headerLogo').style.background =
+    'linear-gradient(135deg,' + m.accent + ',' + m.accent2 + ')';
+  if (lastFile) handleFile(lastFile);
+}
+
+// ════════════════════════════════════════
+// NAMESPACE WORD
+// ════════════════════════════════════════
+var W = 'http://schemas.openxmlformats.org/wordprocessingml/2006/main';
+function parseXML(str) {
+  return new DOMParser().parseFromString(str, 'application/xml');
+}
+
+// ════════════════════════════════════════
+// HELPERS COMPARTILHADOS
+// ════════════════════════════════════════
+function getLN(el) { return el.localName || el.tagName.replace(/^.*:/, ''); }
+function getChild(el, tag) {
+  for (var i = 0; i < el.children.length; i++) {
+    if (getLN(el.children[i]) === tag) return el.children[i];
+  }
+  return null;
+}
+function getWAttr(el, name) {
+  return el.getAttributeNS(W, name) || el.getAttribute('w:' + name) || el.getAttribute(name);
+}
+
+function runToHTML(rEl) {
+  var text = '';
+  for (var i = 0; i < rEl.children.length; i++) {
+    var c = rEl.children[i], ln = getLN(c);
+    if (ln === 't') {
+      var raw = c.textContent;
+      // O atributo xml:space="preserve" usa o namespace XML padrao.
+      // No DOMParser do browser, precisa de getAttributeNS para le-lo.
+      // Alem disso, qualquer texto que seja so espacos deve ser preservado,
+      // pois o browser pode colapsar espacos ao renderizar o HTML.
+      // Solucao: converte espacos para non-breaking space (\u00a0) quando
+      // o atributo xml:space=preserve esta presente OU o texto e so espacos.
+      var xmlSpace = c.getAttributeNS('http://www.w3.org/XML/1998/namespace', 'space')
+                  || c.getAttribute('xml:space')
+                  || '';
+      var isOnlySpaces = raw.length > 0 && raw.replace(/ /g, '').length === 0;
+      if (xmlSpace === 'preserve' || isOnlySpaces) {
+        raw = raw.replace(/ /g, '\u00a0');
+      }
+      raw = raw.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      text += raw;
+    }
+    if (ln === 'br') text += '<br>';
+  }
+  if (text === '') return '';
+  var rPr = getChild(rEl, 'rPr');
+  if (rPr) {
+    var bold   = getChild(rPr, 'b') || getChild(rPr, 'bCs');
+    var italic = getChild(rPr, 'i') || getChild(rPr, 'iCs');
+    var under  = getChild(rPr, 'u');
+    var uVal   = under ? (getWAttr(under, 'val') || '') : '';
+    if (text.replace(/\u00a0/g, '').trim()) {
+      if (under && uVal !== 'none') text = '<u>' + text + '</u>';
+      if (italic) text = '<em>' + text + '</em>';
+      if (bold)   text = '<strong>' + text + '</strong>';
+    }
+  }
+  return text;
+}
+
+function paraToHTML(pEl) {
+  // Le alinhamento do paragrafo (pPr > jc)
+  var align = '';
+  var pPr = getChild(pEl, 'pPr');
+  if (pPr) {
+    var jc = getChild(pPr, 'jc');
+    if (jc) {
+      var jcVal = getWAttr(jc, 'val') || '';
+      if (jcVal === 'center') align = 'center';
+      else if (jcVal === 'right') align = 'right';
+      else if (jcVal === 'both') align = 'justify';
+    }
+  }
+
+  var html = '';
+  for (var i = 0; i < pEl.children.length; i++) {
+    var c = pEl.children[i], ln = getLN(c);
+    if (ln === 'r') html += runToHTML(c);
+    if (ln === 'hyperlink') {
+      for (var j = 0; j < c.children.length; j++) {
+        if (getLN(c.children[j]) === 'r') html += runToHTML(c.children[j]);
+      }
+    }
+  }
+
+  // Retorna objeto com texto e alinhamento para uso em docToHTML
+  return { text: html, align: align };
+}
+
+function cellToHTML(tcEl) {
+  var paras = [];
+  for (var i = 0; i < tcEl.children.length; i++) {
+    if (getLN(tcEl.children[i]) === 'p') {
+      var r = paraToHTML(tcEl.children[i]);
+      var style = r.align ? ' style="text-align:' + r.align + ';"' : '';
+      if (r.text.trim()) paras.push('<span' + style + '>' + r.text + '</span>');
+    }
+  }
+  return paras.length ? paras.join('<br>') : '&nbsp;';
+}
+
+function getColspan(tc) {
+  var tcPr = getChild(tc, 'tcPr');
+  if (!tcPr) return 1;
+  var gs = getChild(tcPr, 'gridSpan');
+  return gs ? parseInt(getWAttr(gs, 'val') || '1', 10) : 1;
+}
+
+function isSkipRow(tc) {
+  var tcPr = getChild(tc, 'tcPr');
+  if (!tcPr) return false;
+  var vm = getChild(tcPr, 'vMerge');
+  return vm !== null && (getWAttr(vm, 'val') || '') !== 'restart';
+}
+
+// ════════════════════════════════════════
+// TABELA CK4
+// ════════════════════════════════════════
+function tableToHTMLCK4(tblEl) {
+  var html = '<table border="1" cellpadding="1" cellspacing="1" style="width:100%;">\n\t<tbody>\n';
+  for (var i = 0; i < tblEl.children.length; i++) {
+    var row = tblEl.children[i];
+    if (getLN(row) !== 'tr') continue;
+    html += '\t\t<tr>\n';
+    for (var j = 0; j < row.children.length; j++) {
+      var tc = row.children[j];
+      if (getLN(tc) !== 'tc' || isSkipRow(tc)) continue;
+      var cs = getColspan(tc);
+      html += '\t\t\t<td' + (cs > 1 ? ' colspan="' + cs + '"' : '') + '>' + cellToHTML(tc) + '</td>\n';
+    }
+    html += '\t\t</tr>\n';
+  }
+  return html + '\t</tbody>\n</table>';
+}
+
+function docToHTMLCK4(bodyEl) {
+  var parts = [];
+  for (var i = 0; i < bodyEl.children.length; i++) {
+    var c = bodyEl.children[i], ln = getLN(c);
+    if (ln === 'p') {
+      var r = paraToHTML(c);
+      if (r.text.trim()) {
+        var style = r.align ? ' style="text-align:' + r.align + ';"' : '';
+        parts.push('<p' + style + '>' + r.text + '</p>');
+      }
+    }
+    else if (ln === 'tbl') parts.push(tableToHTMLCK4(c));
+  }
+  return parts.join('\n');
+}
+
+// ════════════════════════════════════════
+// TABELA CK5
+// ════════════════════════════════════════
+function tableToHTMLCK5(tblEl) {
+  var tblGrid = getChild(tblEl, 'tblGrid');
+  var numCols = tblGrid ? tblGrid.children.length : 1;
+  var colW    = numCols > 0 ? (100 / numCols).toFixed(4) : 100;
+  var colgroup = '<colgroup>';
+  for (var i = 0; i < numCols; i++) colgroup += '<col style="width:' + colW + '%;">';
+  colgroup += '</colgroup>';
+
+  var html = '<figure class="table" style="width:100%;">\n';
+  html    += '<table class="ck-table-resized" style="border-style:solid;">\n';
+  html    += colgroup + '\n<tbody>\n';
+
+  for (var i = 0; i < tblEl.children.length; i++) {
+    var row = tblEl.children[i];
+    if (getLN(row) !== 'tr') continue;
+    html += '<tr>\n';
+    for (var j = 0; j < row.children.length; j++) {
+      var tc = row.children[j];
+      if (getLN(tc) !== 'tc' || isSkipRow(tc)) continue;
+      var cs = getColspan(tc);
+      html += '<td style="border-color:#000000;"' + (cs > 1 ? ' colspan="' + cs + '"' : '') + '>' + cellToHTML(tc) + '</td>\n';
+    }
+    html += '</tr>\n';
+  }
+  return html + '</tbody>\n</table>\n</figure>';
+}
+
+function docToHTMLCK5(bodyEl) {
+  var parts = [];
+  for (var i = 0; i < bodyEl.children.length; i++) {
+    var c = bodyEl.children[i], ln = getLN(c);
+    if (ln === 'p') {
+      var r = paraToHTML(c);
+      if (r.text.trim()) {
+        var style = r.align ? ' style="text-align:' + r.align + ';"' : '';
+        parts.push('<p' + style + '>' + r.text + '</p>');
+      }
+    }
+    else if (ln === 'tbl') parts.push(tableToHTMLCK5(c));
+  }
+  return parts.join('\n');
+}
+
+// ════════════════════════════════════════
+// PROCESSAMENTO PRINCIPAL
+// ════════════════════════════════════════
+async function processDocx(arrayBuffer) {
+  var zip    = await JSZip.loadAsync(arrayBuffer);
+  var xmlStr = await zip.file('word/document.xml').async('string');
+  var doc    = parseXML(xmlStr);
+  var body   = doc.querySelector('body');
+  if (!body) {
+    var all = doc.documentElement.querySelectorAll('*');
+    for (var i = 0; i < all.length; i++) {
+      if ((all[i].localName || all[i].tagName).replace(/^.*:/, '') === 'body') { body = all[i]; break; }
+    }
+  }
+  if (!body) throw new Error('Documento invalido.');
+  return currentMode === 'ck5' ? docToHTMLCK5(body) : docToHTMLCK4(body);
+}
+
+// ════════════════════════════════════════
+// UI
+// ════════════════════════════════════════
+function setStatus(type, msg) {
+  document.getElementById('sb').className = 'sbar ' + type;
+  document.getElementById('st').textContent = msg;
+}
+function fmt(b) { return b < 1048576 ? (b/1024).toFixed(1)+' KB' : (b/1048576).toFixed(1)+' MB'; }
+function escHTML(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function showResult(html) {
+  currentHTML = html;
+  document.getElementById('prevC').innerHTML  = html;
+  document.getElementById('htmlCode').value   = html;
+  document.getElementById('cc').textContent   = html.length.toLocaleString('pt-BR') + ' chars';
+  document.getElementById('btnCopy').disabled = false;
+  document.querySelector('[data-tab="Prev"]').click();
+}
+
+function addHistory(name, size, html, mode) {
+  fileHistory.unshift({ name:name, size:size, html:html, mode:mode, date:new Date() });
+  if (fileHistory.length > 10) fileHistory.pop();
+  renderHistory();
+}
+
+function renderHistory() {
+  var list  = document.getElementById('histList');
+  var empty = document.getElementById('histEmpty');
+  if (!fileHistory.length) { empty.style.display = 'block'; list.innerHTML = ''; return; }
+  empty.style.display = 'none';
+  list.innerHTML = fileHistory.map(function(h, i) {
+    return '<div class="hist-item" onclick="loadHist(' + i + ')">' +
+      '<div class="hi-name">' + escHTML(h.name) +
+      '<span class="hi-badge badge-' + h.mode + '">' + h.mode.toUpperCase() + '</span></div>' +
+      '<div class="hi-meta">' + fmt(h.size) + ' \u00b7 ' + h.html.length.toLocaleString('pt-BR') + ' chars \u00b7 ' + h.date.toLocaleTimeString('pt-BR') + '</div></div>';
+  }).join('');
+}
+
+function loadHist(i) {
+  var h = fileHistory[i];
+  setMode(h.mode);
+  showResult(h.html);
+  document.getElementById('fname').textContent = h.name;
+  document.getElementById('fsize').textContent = fmt(h.size);
+  document.getElementById('finfo').style.display = 'flex';
+  setStatus('ok', 'Recarregado: ' + h.name);
+}
+
+async function handleFile(file) {
+  if (!file || !file.name.endsWith('.docx')) { setStatus('err', 'Use um arquivo .docx'); return; }
+  lastFile = file;
+  document.getElementById('fname').textContent   = file.name;
+  document.getElementById('fsize').textContent   = fmt(file.size);
+  document.getElementById('finfo').style.display = 'flex';
+  setStatus('loading', 'Convertendo para ' + MODES[currentMode].label + '...');
+  try {
+    var html = await processDocx(await file.arrayBuffer());
+    showResult(html);
+    addHistory(file.name, file.size, html, currentMode);
+    setStatus('ok', MODES[currentMode].label + ' \u00b7 ' + file.name + ' \u00b7 ' + html.length.toLocaleString('pt-BR') + ' chars');
+  } catch(e) { setStatus('err', 'Erro: ' + e.message); console.error(e); }
+}
+
+function copyHTML() {
+  if (!currentHTML) return;
+  var b = document.getElementById('btnCopy'), o = b.textContent;
+
+  function onSuccess() {
+    b.textContent = 'Copiado!'; b.classList.add('cok');
+    setTimeout(function() { b.textContent = o; b.classList.remove('cok'); }, 2500);
+  }
+
+  // Tenta clipboard API (HTTPS/localhost)
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(currentHTML).then(onSuccess).catch(fallback);
+  } else {
+    fallback();
+  }
+
+  function fallback() {
+    // Fallback: seleciona o textarea e copia via execCommand (funciona em HTTP)
+    var ta = document.getElementById('htmlCode');
+    ta.removeAttribute('readonly');
+    ta.select();
+    ta.setSelectionRange(0, 99999);
+    try {
+      document.execCommand('copy');
+      onSuccess();
+    } catch(e) {
+      // Ultimo recurso: vai para a aba HTML e avisa o usuario
+      document.querySelector('[data-tab="Html"]').click();
+      b.textContent = 'Selecione e copie manualmente (Ctrl+A, Ctrl+C)';
+      setTimeout(function() { b.textContent = o; }, 4000);
+    }
+    ta.setAttribute('readonly', '');
+    window.getSelection().removeAllRanges();
+  }
+}
+
+function clearAll() {
+  currentHTML = ''; lastFile = null;
+  document.getElementById('prevC').innerHTML =
+    '<div class="empty"><div class="empty-icon">&#128203;</div>' +
+    '<h3>Nenhum arquivo convertido</h3>' +
+    '<p>Selecione a vers\u00e3o e arraste um .docx.</p></div>';
+  document.getElementById('htmlCode').value   = '';
+  document.getElementById('cc').textContent   = '';
+  document.getElementById('btnCopy').disabled = true;
+  document.getElementById('fi').value         = '';
+  document.getElementById('finfo').style.display = 'none';
+  setStatus('', 'Pronto \u2014 arraste um .docx');
+}
+
+// ════════════════════════════════════════
+// REGISTRO DE EVENTOS — tudo aqui, zero onclick inline
+// ════════════════════════════════════════
+document.getElementById('btnCK5').addEventListener('click', function() { setMode('ck5'); });
+document.getElementById('btnCK4').addEventListener('click', function() { setMode('ck4'); });
+document.getElementById('btnCopy').addEventListener('click', copyHTML);
+document.getElementById('btnClear').addEventListener('click', clearAll);
+document.getElementById('btnSelectFile').addEventListener('click', function() { document.getElementById('fi').click(); });
+document.getElementById('fi').addEventListener('change', function(e) { if (e.target.files[0]) handleFile(e.target.files[0]); });
+
+document.querySelectorAll('.tab').forEach(function(t) {
+  t.addEventListener('click', function() {
+    document.querySelectorAll('.tab').forEach(function(x) { x.classList.remove('active'); });
+    document.querySelectorAll('.tc').forEach(function(x) { x.classList.remove('active'); });
+    t.classList.add('active');
+    document.getElementById('tab' + t.dataset.tab).classList.add('active');
+  });
+});
+
+document.addEventListener('dragover', function(e) { e.preventDefault(); document.getElementById('dov').classList.add('on'); });
+document.addEventListener('dragleave', function(e) { if (!e.relatedTarget) document.getElementById('dov').classList.remove('on'); });
+document.addEventListener('drop', function(e) {
+  e.preventDefault();
+  document.getElementById('dov').classList.remove('on');
+  if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+});
+
+// Inicializa
+setMode('ck5');
+</script>
+</body>
+</html>
