@@ -1,16 +1,21 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% block title %}Painel{% endblock %} — Bulk contratos</title>
+  <title>IXC Utilities</title>
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/favicon.png') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
+
 <body class="app-shell">
   <aside class="sidebar" aria-label="Navegação principal">
     <div class="sidebar-brand">
-      <span class="sidebar-brand-mark"></span>
-      <span class="sidebar-brand-text">Bulk contratos</span>
+      <span class="sidebar-brand-mark logo-ixc-utilities">
+        <img src="{{ url_for('static', filename='img/favicon.png') }}" alt="IXC Utilities" />
+      </span>
+      <span class="sidebar-brand-text">IXC Utilities</span>
     </div>
     <p class="sidebar-tag">Webservice IXC</p>
     <nav class="sidebar-nav">
@@ -19,13 +24,25 @@
         Criação em lote
       </a>
       <span class="sidebar-section">Em expansão</span>
-      <a href="{{ url_for('modulos.massa_contratos') }}" class="sidebar-link {% if request.path.startswith('/modulos/massa-contratos') %}is-active{% endif %}">
+      <a href="{{ url_for('modulos.massa_contratos') }}"
+        class="sidebar-link {% if request.path.startswith('/modulos/massa-contratos') %}is-active{% endif %}">
         <span class="sidebar-link-icon" aria-hidden="true">◇</span>
         Massa em contratos
       </a>
-      <a href="{{ url_for('modulos.boletos') }}" class="sidebar-link {% if request.path.startswith('/modulos/boletos') %}is-active{% endif %}">
+      <a href="{{ url_for('modulos.boletos') }}"
+        class="sidebar-link {% if request.path.startswith('/modulos/boletos') %}is-active{% endif %}">
         <span class="sidebar-link-icon" aria-hidden="true">◇</span>
         Boletos
+      </a>
+      <a onclick="window.open('/modulos/modelo-contrato', '_blank')"
+        class="sidebar-link {% if request.path.startswith('/modulos/modelo-contrato') %}is-active{% endif %}">
+        <span class="sidebar-link-icon" aria-hidden="true">◇</span>
+        Modelo de contrato
+      </a>
+      <a style="display: none;" href="{{ url_for('modulos.processar_logs_em_massa') }}"
+        class="sidebar-link {% if request.path.startswith('/modulos/processar-logs-em-massa') %}is-active{% endif %}">
+        <span class="sidebar-link-icon" aria-hidden="true">◇</span>
+        Processar logs em massa
       </a>
     </nav>
   </aside>
@@ -39,4 +56,5 @@
     </main>
   </div>
 </body>
+
 </html>
